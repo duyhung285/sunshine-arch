@@ -26,6 +26,17 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '28.0.0'
+            }
+        }
+    }
+}
+
 // Versions number variables are defined in the module build.gradle file
 dependencies {
     compile "com.android.support:appcompat-v7:$support_version"
