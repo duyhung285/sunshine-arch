@@ -8,14 +8,14 @@ import android.content.Context;
 
 @Database(entities = {WeatherEntry.class}, version = 1)
 @TypeConverters(DateConverter.class)
-abstract class SunshineDatabase extends RoomDatabase {
-    abstract WeatherDao weatherDao();
+public abstract class SunshineDatabase extends RoomDatabase {
+    public abstract WeatherDao weatherDao();
 
     private static final String DB_NAME = "weather";
     private static final Object LOCK = new Object();
     private static volatile SunshineDatabase sInstance;
 
-    static SunshineDatabase getInstance(Context context) {
+    public static SunshineDatabase getInstance(Context context) {
         if (sInstance == null) {
             synchronized (LOCK) {
                 if (sInstance == null) {

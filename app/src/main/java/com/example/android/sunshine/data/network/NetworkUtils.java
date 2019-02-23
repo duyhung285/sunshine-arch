@@ -122,6 +122,18 @@ final class NetworkUtils {
             InputStream in = urlConnection.getInputStream();
 
             Scanner scanner = new Scanner(in);
+
+            // By setting the delimiter to \A, beginning of the stream.
+            // We force the scanner to read the entire contents of the stream into the next token stream
+
+            // It also buffers the data. This means that it not only pulls the data from the network
+            // in small chunks, but because http isn't required to give us content size, our code
+            // needs to be ready to handle buffers of different sizes. This code automatically
+            // allocates and deallocate the buffers as needed. It also handles the character
+            // encoding for us. Specifically, it translates from UTF-8 which is the default encoding
+            // for json and JavaScript to UTF-16, the format used by Android.
+
+            // https://stackoverflow.com/questions/309424/how-do-i-read-convert-an-inputstream-into-a-string-in-java
             scanner.useDelimiter("\\A");
 
             boolean hasInput = scanner.hasNext();
