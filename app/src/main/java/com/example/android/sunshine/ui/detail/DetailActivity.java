@@ -19,6 +19,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.example.android.sunshine.AppExecutors;
 import com.example.android.sunshine.R;
@@ -54,8 +55,7 @@ public class DetailActivity extends AppCompatActivity {
 
         mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
         long timestamp = getIntent().getLongExtra(WEATHER_ID_EXTRA, -1);
-        //Date date = new Date(timestamp);
-        Date date = SunshineDateUtils.getNormalizedUtcDateForToday();
+        Date date = new Date(timestamp);
 
         DetailViewModelFactory factory = InjectorUtils.provideDetailViewModelFactory(this, date);
         mViewModel = ViewModelProviders.of(this, factory).get(DetailActivityViewModel.class);
@@ -86,8 +86,11 @@ public class DetailActivity extends AppCompatActivity {
         });
     }*/
 
+    private static final String TAG = "DetailActivity";
 
     private void bindWeatherToUI(WeatherEntry weatherEntry) {
+
+        Log.d(TAG, "bindWeatherToUI: ");
         /****************
          * Weather Icon *
          ****************/
