@@ -23,6 +23,7 @@ import com.example.android.sunshine.AppExecutors;
 import com.example.android.sunshine.data.database.WeatherDao;
 import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.data.network.WeatherNetworkDataSource;
+import com.example.android.sunshine.utilities.SunshineDateUtils;
 
 import java.util.Date;
 
@@ -31,7 +32,7 @@ import java.util.Date;
  * and {@link WeatherDao}
  */
 public class SunshineRepository {
-    private static final String LOG_TAG = SunshineRepository.class.getSimpleName();
+    private static final String TAG = SunshineRepository.class.getSimpleName();
 
     // For Singleton instantiation
     private static final Object LOCK = new Object();
@@ -50,7 +51,10 @@ public class SunshineRepository {
 
         mWeatherNetworkDataSource.getCurrentWeatherForecasts().observeForever(newForecastFromNetwork -> {
             mExecutors.diskIO().execute(() -> {
+                deleteOldData();
+                Log.d(TAG, "old weather deleted");
                 mWeatherDao.bulkInsert(newForecastFromNetwork);
+                Log.d(TAG, "new weather inserted");
             });
         });
 
@@ -59,12 +63,12 @@ public class SunshineRepository {
     public synchronized static SunshineRepository getInstance(
             WeatherDao weatherDao, WeatherNetworkDataSource weatherNetworkDataSource,
             AppExecutors executors) {
-        Log.d(LOG_TAG, "Getting the repository");
+        Log.d(TAG, "Getting the repository");
         if (sInstance == null) {
             synchronized (LOCK) {
                 sInstance = new SunshineRepository(weatherDao, weatherNetworkDataSource,
                         executors);
-                Log.d(LOG_TAG, "Made new repository");
+                Log.d(TAG, "Made new repository");
             }
         }
         return sInstance;
@@ -81,7 +85,10 @@ public class SunshineRepository {
         if (mInitialized) return;
         mInitialized = true;
 
-        startFetchWeatherService();
+        mExecutors.diskIO().execute(() -> {
+            if (isFetchNeeded()) startFetchWeatherService();
+        });
+
     }
 
     /**
@@ -92,7 +99,8 @@ public class SunshineRepository {
      * Deletes old weather data because we don't need to keep multiple days' data
      */
     private void deleteOldData() {
-        // TODO Finish this method when instructed
+        Date date = SunshineDateUtils.getNormalizedUtcDateForToday();
+        mWeatherDao.deleteOldData(date);
     }
 
     /**
@@ -101,8 +109,8 @@ public class SunshineRepository {
      * @return Whether a fetch is needed
      */
     private boolean isFetchNeeded() {
-        // TODO Finish this method when instructed
-        return true;
+        Date date = SunshineDateUtils.getNormalizedUtcDateForToday();
+        return mWeatherDao.countAllFutureWeather(date) < WeatherNetworkDataSource.NUM_DAYS;
     }
 
     /**
