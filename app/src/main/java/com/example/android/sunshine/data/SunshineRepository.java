@@ -24,6 +24,7 @@ import com.example.android.sunshine.data.database.ListWeatherEntry;
 import com.example.android.sunshine.data.database.WeatherDao;
 import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.data.network.WeatherNetworkDataSource;
+import com.example.android.sunshine.utilities.InjectorUtils;
 import com.example.android.sunshine.utilities.SunshineDateUtils;
 
 import java.util.Date;
@@ -87,9 +88,13 @@ public class SunshineRepository {
         if (mInitialized) return;
         mInitialized = true;
 
+        mWeatherNetworkDataSource.scheduleRecurringFetchWeatherSync();
+
         mExecutors.diskIO().execute(() -> {
             if (isFetchNeeded()) startFetchWeatherService();
         });
+
+
 
     }
 
